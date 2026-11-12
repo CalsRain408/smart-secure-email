@@ -1,0 +1,29 @@
+# HTTPS for both the browser API and server-to-server federation.
+# Combine with local + a domain profile:  --spring.profiles.active=local,domain-a,tls
+# Certificates come from scripts/gen-dev-certs.sh (dev CA, git-ignored).
+server:
+  ssl:
+    bundle: server
+    enabled-protocols: TLSv1.3,TLSv1.2
+  servlet:
+    session:
+      cookie:
+        secure: true
+
+spring:
+  ssl:
+    bundle:
+      pem:
+        server:
+          keystore:
+            certificate: file:./data/certs/${ssm.domain.id}.crt
+            private-key: file:./data/certs/${ssm.domain.id}.key
+        federation-client:
+          # Outbound federation calls trust only the dev CA (not the JDK default trust store).
+          truststore:
+            certificate: file:./data/certs/ca.crt
+
+ssm:
+  federation:
+    scheme: https
+    ssl-bundle: federation-client

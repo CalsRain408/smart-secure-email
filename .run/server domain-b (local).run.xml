@@ -1,0 +1,12 @@
+<component name="ProjectRunConfigurationManager">
+  <!-- Starts mail domain b on :8082 with the embedded H2 database (no Docker needed). -->
+  <configuration default="false" name="server domain-b (local)" type="Application" factoryName="Application">
+    <option name="MAIN_CLASS_NAME" value="com.agent.smartsecureemail.SmartSecureEmailApplication" />
+    <module name="smart-secure-email" />
+    <option name="VM_PARAMETERS" value="-Dspring.profiles.active=local,domain-b" />
+    <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/server" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

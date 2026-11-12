@@ -1,0 +1,670 @@
+/* Global layout for Smart Secure Mail. Panes are separated by hairlines, not cards. */
+
+:root {
+  --ink: #1b2a3d;
+  --ink-soft: #4e5c6b;
+  --ink-faint: #7d8896;
+  --envelope: #eceff3;
+  --paper: #ffffff;
+  --rule: #d6dce3;
+  --rule-soft: #e6eaef;
+  --seal: #0e6b62;
+  --seal-tint: #e2eff0;
+  --delivered: #1e7f4f;
+  --pending: #a86400;
+  --failed: #b8352a;
+}
+
+html,
+body,
+#root,
+#root > .ant-app {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  background: var(--envelope);
+  color: var(--ink);
+  font-feature-settings: 'tnum' 0;
+  -webkit-font-smoothing: antialiased;
+}
+
+.tnum {
+  font-variant-numeric: tabular-nums;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+:focus-visible {
+  outline: 2px solid var(--seal);
+  outline-offset: 2px;
+}
+
+/* ------------------------------------------------------------ auth */
+
+.auth {
+  min-height: 100%;
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(360px, 0.9fr);
+}
+
+.auth__plate {
+  padding: 56px 64px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  border-right: 1px solid var(--rule);
+}
+
+.auth__product {
+  font-size: 14px;
+  color: var(--ink-soft);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.auth__domain {
+  display: flex;
+  align-items: center;
+  gap: 0.22em;
+  margin: 0;
+  font-size: clamp(36px, 5.6vw, 72px);
+  line-height: 1.05;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  word-break: break-all;
+}
+
+.auth__org {
+  margin: 16px 0 0;
+  font-size: 18px;
+  color: var(--ink-soft);
+}
+
+.auth__note {
+  max-width: 34em;
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--ink-soft);
+}
+
+.auth__panel {
+  background: var(--paper);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 32px;
+}
+
+.auth__form {
+  width: 100%;
+  max-width: 360px;
+}
+
+.auth__title {
+  margin: 0 0 4px;
+  font-size: 22px;
+  font-weight: 600;
+}
+
+.auth__subtitle {
+  margin: 0 0 28px;
+  color: var(--ink-soft);
+}
+
+@media (max-width: 860px) {
+  .auth {
+    grid-template-columns: 1fr;
+  }
+  .auth__plate {
+    padding: 28px 20px;
+    gap: 20px;
+    border-right: 0;
+    border-bottom: 1px solid var(--rule);
+  }
+  .auth__note {
+    display: none;
+  }
+  .auth__panel {
+    padding: 28px 20px;
+    align-items: flex-start;
+  }
+}
+
+/* ------------------------------------------------------------ app shell */
+
+.shell {
+  height: 100%;
+  display: grid;
+  grid-template-columns: 232px minmax(300px, 380px) minmax(0, 1fr);
+}
+
+.shell--wide {
+  grid-template-columns: 232px minmax(0, 1fr);
+}
+
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  padding: 20px 16px 16px;
+  gap: 20px;
+  min-height: 0;
+}
+
+.sidebar__identity {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 0 8px;
+}
+
+.sidebar__domain {
+  font-size: 15px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  word-break: break-all;
+}
+
+.sidebar__org {
+  font-size: 12px;
+  color: var(--ink-soft);
+  padding-left: 22px;
+}
+
+.sidebar__nav {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.navlink {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 4px;
+  color: var(--ink-soft);
+  text-decoration: none;
+  font-size: 14px;
+}
+
+.navlink:hover {
+  background: rgba(255, 255, 255, 0.6);
+  color: var(--ink);
+}
+
+.navlink[aria-current='page'] {
+  background: var(--paper);
+  color: var(--ink);
+  font-weight: 500;
+}
+
+.sidebar__footer {
+  margin-top: auto;
+  border-top: 1px solid var(--rule);
+  padding: 14px 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.sidebar__footer .navlink {
+  width: 100%;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+}
+
+.sidebar__me {
+  padding: 0 10px 8px;
+  font-size: 13px;
+  line-height: 1.4;
+  word-break: break-all;
+}
+
+.sidebar__me small {
+  display: block;
+  color: var(--ink-soft);
+  font-size: 12px;
+}
+
+.pane {
+  background: var(--paper);
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.pane--list {
+  border-left: 1px solid var(--rule);
+  border-right: 1px solid var(--rule);
+}
+
+.pane__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 20px 12px;
+  border-bottom: 1px solid var(--rule-soft);
+}
+
+.pane__title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.pane__count {
+  color: var(--ink-faint);
+  font-size: 13px;
+  margin-left: 8px;
+  font-weight: 400;
+}
+
+.pane__body {
+  flex: 1;
+  overflow: auto;
+  min-height: 0;
+}
+
+.pane__foot {
+  border-top: 1px solid var(--rule-soft);
+  padding: 8px 12px;
+  display: flex;
+  justify-content: center;
+}
+
+/* ------------------------------------------------------------ mail list */
+
+.maillist {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.mailrow {
+  display: block;
+  position: relative;
+  padding: 12px 20px 12px 22px;
+  border-bottom: 1px solid var(--rule-soft);
+  color: inherit;
+  text-decoration: none;
+}
+
+.mailrow:hover {
+  background: #f6f8fa;
+}
+
+/* Rows are links; keep ink colour instead of the global link/hover colour. */
+.mailrow,
+.mailrow:hover,
+.mailrow:focus,
+.navlink:hover,
+.navlink:focus {
+  color: var(--ink);
+}
+
+.mailrow[aria-current='true'] {
+  background: var(--seal-tint);
+}
+
+/* Unread marker: a seal-coloured bar, the one place the list uses colour for state. */
+.mailrow--unread::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 12px;
+  bottom: 12px;
+  width: 3px;
+  background: var(--seal);
+}
+
+.mailrow__top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.mailrow__who {
+  font-size: 14px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mailrow--unread .mailrow__who,
+.mailrow--unread .mailrow__subject {
+  font-weight: 600;
+}
+
+.mailrow__time {
+  flex: none;
+  font-size: 12px;
+  color: var(--ink-faint);
+}
+
+.mailrow__subject {
+  margin-top: 2px;
+  font-size: 14px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mailrow__preview {
+  margin-top: 2px;
+  font-size: 13px;
+  color: var(--ink-soft);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ------------------------------------------------------------ reading pane */
+
+.reader {
+  padding: 28px 40px 48px;
+  max-width: 880px;
+}
+
+.reader__subject {
+  margin: 0 0 20px;
+  font-size: 22px;
+  line-height: 1.35;
+  font-weight: 600;
+  word-break: break-word;
+}
+
+.reader__meta {
+  display: grid;
+  grid-template-columns: 96px minmax(0, 1fr);
+  gap: 20px;
+  align-items: start;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--rule-soft);
+}
+
+.reader__parties {
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr);
+  row-gap: 6px;
+  font-size: 14px;
+}
+
+.reader__label {
+  color: var(--ink-faint);
+}
+
+.reader__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 16px 0 0;
+}
+
+.reader__body {
+  margin: 24px 0 0;
+  font-size: 15px;
+  line-height: 1.75;
+  max-width: 72ch;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-family: inherit;
+}
+
+/* ------------------------------------------------------------ address tags */
+
+.addr {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 100%;
+  margin: 0 10px 4px 0;
+  vertical-align: top;
+}
+
+.addr__mark {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: 2px solid currentColor;
+  box-sizing: border-box;
+}
+
+.addr__name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.addr__domain {
+  color: var(--ink-faint);
+  font-size: 12px;
+}
+
+/* ------------------------------------------------------------ delivery route */
+
+.route {
+  margin-top: 20px;
+  border: 1px solid var(--rule-soft);
+  border-radius: 4px;
+}
+
+.route__head {
+  padding: 10px 14px;
+  font-size: 13px;
+  color: var(--ink-soft);
+  border-bottom: 1px solid var(--rule-soft);
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.route__row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 96px;
+  align-items: center;
+  gap: 12px;
+  padding: 9px 14px;
+  font-size: 13px;
+}
+
+.route__row + .route__row {
+  border-top: 1px solid var(--rule-soft);
+}
+
+.route__path {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.route__line {
+  flex: 0 0 28px;
+  height: 0;
+  border-top: 1px dashed var(--rule);
+}
+
+.route__line--local {
+  border-top-style: solid;
+}
+
+.route__status {
+  justify-self: end;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 500;
+}
+
+.route__dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.route__status--DELIVERED { color: var(--delivered); }
+.route__status--PENDING,
+.route__status--RETRYING { color: var(--pending); }
+.route__status--FAILED { color: var(--failed); }
+
+.route__status--PENDING .route__dot,
+.route__status--RETRYING .route__dot {
+  animation: route-pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes route-pulse {
+  50% { opacity: 0.25; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .route__status--PENDING .route__dot,
+  .route__status--RETRYING .route__dot {
+    animation: none;
+  }
+}
+
+/* ------------------------------------------------------------ empty states */
+
+.empty {
+  padding: 56px 28px;
+  color: var(--ink-soft);
+  max-width: 32em;
+}
+
+.empty__title {
+  margin: 0 0 6px;
+  font-size: 15px;
+  color: var(--ink);
+  font-weight: 500;
+}
+
+.empty p {
+  margin: 0 0 16px;
+  line-height: 1.6;
+}
+
+/* ------------------------------------------------------------ settings */
+
+.settings {
+  padding: 28px 40px;
+  max-width: 720px;
+}
+
+.settings__section {
+  padding: 20px 0;
+  border-top: 1px solid var(--rule-soft);
+}
+
+.settings__section h2 {
+  margin: 0 0 12px;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+/* ------------------------------------------------------------ responsive */
+
+.mobile-only {
+  display: none;
+}
+
+@media (max-width: 1100px) {
+  .shell {
+    grid-template-columns: 200px minmax(260px, 320px) minmax(0, 1fr);
+  }
+  .reader {
+    padding: 24px 24px 40px;
+  }
+}
+
+@media (max-width: 820px) {
+  .shell,
+  .shell--wide {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto minmax(0, 1fr);
+  }
+  .sidebar {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 12px;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--rule);
+  }
+  .sidebar__org,
+  .sidebar__me {
+    display: none;
+  }
+  .sidebar__nav {
+    flex-direction: row;
+    order: 3;
+    width: 100%;
+    overflow-x: auto;
+  }
+  .sidebar__footer {
+    margin: 0 0 0 auto;
+    border: 0;
+    padding: 0;
+    flex-direction: row;
+  }
+  .sidebar__footer .navlink {
+    width: auto;
+    padding: 8px;
+  }
+  /* Icon-only on phones; the text stays available to screen readers. */
+  .sidebar__footer .navlink__text {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+  }
+  .sidebar__identity {
+    flex: 1;
+    min-width: 0;
+  }
+  .pane--list {
+    border: 0;
+  }
+  /* One pane at a time on phones: the list, or the open message. */
+  .shell--reading .pane--list,
+  .shell:not(.shell--reading) .pane--reader {
+    display: none;
+  }
+  .mobile-only {
+    display: inline-flex;
+  }
+  .reader,
+  .settings {
+    padding: 20px 16px 32px;
+  }
+  .reader__meta {
+    grid-template-columns: 1fr;
+  }
+  .reader__meta > :first-child {
+    display: none;
+  }
+}

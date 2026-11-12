@@ -1,0 +1,41 @@
+# Local development without Docker/PostgreSQL. Combine with a domain profile:
+#   --spring.profiles.active=local,domain-a
+# Each domain gets its own H2 file database under ./data/<domain-id>/ (PostgreSQL mode),
+# so the two instances never share storage. Not for production use.
+spring:
+  datasource:
+    url: jdbc:h2:file:./data/${ssm.domain.id}/db/mail;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DEFAULT_NULL_ORDERING=HIGH;AUTO_SERVER=FALSE
+    username: sa
+    password: ""
+
+server:
+  servlet:
+    session:
+      cookie:
+        # Local runs are plain HTTP until TLS is wired in (see docs/security.md).
+        secure: ${SSM_COOKIE_SECURE:false}
+
+ssm:
+  federation:
+    scheme: http   # the `tls` profile switches this to https
+
+# ---- Local federation topology: domain-a (:8081) <-> domain-b (:8082) ----
+# The shared secret is generated once by scripts/init-dev-secrets.sh (never committed).
+---
+spring.config.activate.on-profile: domain-a
+ssm:
+  federation:
+    peers:
+      - domain: domain-b.test
+        base-url: ${ssm.federation.scheme}://localhost:8082
+        key-id: dev-a-b
+        shared-secret-file: ./data/federation-dev/domain-a.test__domain-b.test.secret
+---
+spring.config.activate.on-profile: domain-b
+ssm:
+  federation:
+    peers:
+      - domain: domain-a.test
+        base-url: ${ssm.federation.scheme}://localhost:8081
+        key-id: dev-a-b
+        shared-secret-file: ./data/federation-dev/domain-a.test__domain-b.test.secret

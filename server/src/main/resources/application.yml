@@ -1,0 +1,85 @@
+# Shared configuration for every mail domain instance.
+# Activate exactly one domain profile (domain-a | domain-b) plus, optionally, `local`.
+#   PostgreSQL (default): SSM_DB_URL / SSM_DB_USERNAME / SSM_DB_PASSWORD must be set.
+#   local profile:        embedded H2 file database per domain, no external services.
+spring:
+  application:
+    name: smart-secure-email
+  datasource:
+    # No defaults on purpose: never ship credentials; startup fails if unset.
+    url: ${SSM_DB_URL}
+    username: ${SSM_DB_USERNAME}
+    password: ${SSM_DB_PASSWORD}
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate   # schema is owned by Flyway migrations only
+    properties:
+      hibernate:
+        jdbc.time_zone: UTC
+        default_batch_fetch_size: 64
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+  servlet:
+    multipart:
+      # Hard upper bounds; the attachment module applies stricter per-type checks.
+      max-file-size: 5MB
+      max-request-size: 20MB
+  jackson:
+    default-property-inclusion: non_null
+    deserialization:
+      fail-on-unknown-properties: true
+  threads:
+    virtual:
+      enabled: true
+
+server:
+  port: ${SSM_SERVER_PORT:8080}
+  error:
+    include-stacktrace: never
+    include-message: never
+    include-binding-errors: never
+  tomcat:
+    max-swallow-size: 2MB
+    max-http-form-post-size: 1MB
+  servlet:
+    session:
+      timeout: 30m
+      tracking-modes: cookie   # never put the session id in URLs
+      cookie:
+        name: SSM_SESSION
+        http-only: true
+        same-site: strict
+        secure: ${SSM_COOKIE_SECURE:true}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: never
+
+ssm:
+  security:
+    password-hash-strength: 12
+  federation:
+    # Trusted peers come from the deployment (local profile, or SSM_FEDERATION_PEERS_0_* env vars).
+    peers: []
+    clock-skew: 300s
+    nonce-ttl: 900s
+    request-timeout: 10s
+    retry-delays: 30s, 1m, 2m, 5m, 15m, 30m
+    dispatch-interval-ms: 1000
+    max-envelope-bytes: 1048576
+    ssl-bundle:
+  domain:
+    # id / name / display-name come from the domain profile (application-domain-*.yml).
+    storage-root: ${SSM_STORAGE_ROOT:./data/${ssm.domain.id}/storage}
+
+logging:
+  level:
+    root: INFO
+    com.agent.smartsecureemail: INFO

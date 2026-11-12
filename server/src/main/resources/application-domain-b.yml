@@ -1,0 +1,15 @@
+# Mail domain B. Activate with profile `domain-b`.
+ssm:
+  domain:
+    id: domain-b
+    name: ${SSM_DOMAIN_NAME:domain-b.test}
+    display-name: ${SSM_DOMAIN_DISPLAY_NAME:Domain B Corp}
+
+server:
+  port: ${SSM_SERVER_PORT:8082}
+  servlet:
+    session:
+      cookie:
+        # Distinct per domain: browsers do not separate cookies by port, so two instances
+        # on the same host (localhost demo) would otherwise overwrite each other's session.
+        name: SSM_SESSION_B

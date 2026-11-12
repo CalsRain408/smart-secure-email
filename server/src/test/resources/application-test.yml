@@ -1,0 +1,16 @@
+# Test profile: isolated in-memory H2 (PostgreSQL mode), unique per Spring context.
+spring:
+  datasource:
+    url: jdbc:h2:mem:ssm-${random.uuid};MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DEFAULT_NULL_ORDERING=HIGH;DB_CLOSE_DELAY=-1
+    username: sa
+    password: ""
+
+ssm:
+  domain:
+    id: domain-test
+    name: domain-test.test
+    display-name: Test Domain
+    storage-root: target/test-data/${ssm.domain.id}/storage
+  security:
+    # Minimum BCrypt cost to keep tests fast. Real profiles use 12.
+    password-hash-strength: 4

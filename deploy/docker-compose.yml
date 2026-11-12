@@ -1,0 +1,119 @@
+# Two fully isolated mail domains. Each domain has its own server, PostgreSQL,
+# Redis and storage volume. Server instances may talk to each other only over HTTP
+# using the documented inter-server protocol (docs/protocol.md).
+#
+# Usage:
+#   cp deploy/.env.example deploy/.env      # then replace every secret
+#   docker compose -f deploy/docker-compose.yml --env-file deploy/.env up --build
+
+name: smart-secure-mail
+
+x-server-common: &server-common
+  build:
+    context: ../server
+  restart: unless-stopped
+
+x-server-env: &server-env
+  SSM_SERVER_PORT: "8080"
+  SSM_STORAGE_ROOT: /data/storage
+  # Compose currently runs plain HTTP (requests between servers are still HMAC-signed).
+  # HTTPS is available via the `tls` profile locally; see docs/security.md L1.
+  SSM_COOKIE_SECURE: "false"
+  LOGGING_STRUCTURED_FORMAT_CONSOLE: ecs
+
+services:
+  # ---------------- domain-a.test ----------------
+  postgres-a:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: mail_domain_a
+      POSTGRES_USER: ${DOMAIN_A_DB_USER:?set DOMAIN_A_DB_USER}
+      POSTGRES_PASSWORD: ${DOMAIN_A_DB_PASSWORD:?set DOMAIN_A_DB_PASSWORD}
+    volumes: [pg-a:/var/lib/postgresql/data]
+    networks: [net-a]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      retries: 10
+
+  redis-a:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--requirepass", "${DOMAIN_A_REDIS_PASSWORD:?set DOMAIN_A_REDIS_PASSWORD}"]
+    networks: [net-a]
+
+  server-a:
+    <<: *server-common
+    environment:
+      <<: *server-env
+      SPRING_PROFILES_ACTIVE: domain-a
+      SSM_DB_URL: jdbc:postgresql://postgres-a:5432/mail_domain_a
+      SSM_DB_USERNAME: ${DOMAIN_A_DB_USER}
+      SSM_DB_PASSWORD: ${DOMAIN_A_DB_PASSWORD}
+      # Federation peer: domain-b, reachable only over the shared `federation` network.
+      SSM_FEDERATION_PEERS_0_DOMAIN: domain-b.test
+      SSM_FEDERATION_PEERS_0_BASE_URL: http://server-b:8080
+      SSM_FEDERATION_PEERS_0_KEY_ID: compose-a-b
+      SSM_FEDERATION_PEERS_0_SHARED_SECRET: ${FEDERATION_SECRET_A_B:?set FEDERATION_SECRET_A_B}
+    ports: ["8081:8080"]
+    volumes: [storage-a:/data]
+    depends_on:
+      postgres-a: { condition: service_healthy }
+      redis-a: { condition: service_started }
+    networks: [net-a, federation]
+
+  # ---------------- domain-b.test ----------------
+  postgres-b:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: mail_domain_b
+      POSTGRES_USER: ${DOMAIN_B_DB_USER:?set DOMAIN_B_DB_USER}
+      POSTGRES_PASSWORD: ${DOMAIN_B_DB_PASSWORD:?set DOMAIN_B_DB_PASSWORD}
+    volumes: [pg-b:/var/lib/postgresql/data]
+    networks: [net-b]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      retries: 10
+
+  redis-b:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--requirepass", "${DOMAIN_B_REDIS_PASSWORD:?set DOMAIN_B_REDIS_PASSWORD}"]
+    networks: [net-b]
+
+  server-b:
+    <<: *server-common
+    environment:
+      <<: *server-env
+      SPRING_PROFILES_ACTIVE: domain-b
+      SSM_DB_URL: jdbc:postgresql://postgres-b:5432/mail_domain_b
+      SSM_DB_USERNAME: ${DOMAIN_B_DB_USER}
+      SSM_DB_PASSWORD: ${DOMAIN_B_DB_PASSWORD}
+      SSM_FEDERATION_PEERS_0_DOMAIN: domain-a.test
+      SSM_FEDERATION_PEERS_0_BASE_URL: http://server-a:8080
+      SSM_FEDERATION_PEERS_0_KEY_ID: compose-a-b
+      SSM_FEDERATION_PEERS_0_SHARED_SECRET: ${FEDERATION_SECRET_A_B:?set FEDERATION_SECRET_A_B}
+    ports: ["8082:8080"]
+    volumes: [storage-b:/data]
+    depends_on:
+      postgres-b: { condition: service_healthy }
+      redis-b: { condition: service_started }
+    networks: [net-b, federation]
+
+# net-a / net-b are private per domain: server-b cannot reach postgres-a / redis-a and vice versa.
+# Only the two server containers share the `federation` network.
+networks:
+  net-a:
+    internal: true
+  net-b:
+    internal: true
+  federation: {}
+
+volumes:
+  pg-a: {}
+  pg-b: {}
+  storage-a: {}
+  storage-b: {}
